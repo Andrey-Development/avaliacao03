@@ -8,6 +8,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     paddingTop: "8%",
   },
+  button: {
+    marginBottom: 8,
+  },
 });
 
 export default styles;

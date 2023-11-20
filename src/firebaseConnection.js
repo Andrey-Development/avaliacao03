@@ -4,7 +4,7 @@ import { getDatabase } from "firebase/database";
 const firebaseConfig = {
   apiKey: "AIzaSyClNHI4_OpfDz0PkqDvKgSZMcnArcj2TDI",
   authDomain: "avaliacao0003.firebaseapp.com",
-  databaseURL: "https://avaliacao0003-default-rtdb.firebaseio.com",
+  databaseURL: "https://avaliacao0003-default-rtdb.firebaseio.com/",
   projectId: "avaliacao0003",
   storageBucket: "avaliacao0003.appspot.com",
   messagingSenderId: "708719987689",

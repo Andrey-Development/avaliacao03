@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { UserContext } from "../contexts/AuthContext";
 import { db, app } from './../firebaseConnection';
 import AuthRoutes from './auth.routes';
 import AppRoutes from './app.routes';
 
 function Routes() {
+    const { signed } = useContext(UserContext);
     const [user, setUser] = useState(null);
     const auth = getAuth(app);
 
@@ -13,12 +15,13 @@ function Routes() {
         const subscriber = onAuthStateChanged(auth, (user) => {
             setUser(user);
         });
+        if(subscriber) console.log(subscriber);
         return subscriber;
     }, []);
     return (
         <NavigationContainer>
             {
-                user ? <AppRoutes /> : <AuthRoutes />
+                signed ? <AppRoutes /> : <AuthRoutes />
             }
         </NavigationContainer>
     )

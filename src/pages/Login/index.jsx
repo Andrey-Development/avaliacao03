@@ -1,41 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useContext, useState } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View, Text, StyleSheet, TextInput, Button, FlatList, ActivityIndicator } from 'react-native';
 import { signInWithEmailAndPassword, getAuth } from 'firebase/auth'; // Import the necessary Firebase auth functions
 
 import { db, app } from './../../firebaseConnection';
+import { UserContext } from '../../contexts/AuthContext';
 
 export default function Login({navigation}) {
     // const navigation = createNativeStackNavigator();
+    const { loginUser } = useContext(UserContext);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [user, setUser] = useState('');
     const [tasks, setTasks] = useState([]);
     const auth = getAuth(app);
-
-    async function logar() {
-        // await signInWithEmailAndPassword(auth, email, password)
-        await signInWithEmailAndPassword(auth, 'nandreyout@gmail.com', 'Teste123')
-            .then((value) => {
-                alert('Bem-vindo: ' + value.user.email);
-                setUser(value.user.email);
-            })
-            .catch((error) => {
-                console.log(error);
-                return;
-            });
-
-        setEmail('');
-        setPassword('');
-        setTasks([{"id": 1, "nome": "task 1", "descricao": "descricao da task 1"}]);
-    }
-
-    async function logout() {
-        await signOut(auth);
-        setUser('');
-        setTasks([]);
-        alert('Deslgoado com sucesso!');
-    }
 
     return (
         <View style={styles.container}>
@@ -58,7 +36,12 @@ export default function Login({navigation}) {
             <Button
                 style={styles.button}
                 title="Acessar"
-                onPress={logar}
+                onPress={() => { 
+                    loginUser({
+                        email: email,
+                        password: password
+                    });
+                }}
             />
 
             <Button

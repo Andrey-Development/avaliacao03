@@ -1,12 +1,14 @@
-import React, { useState, useLayoutEffect } from "react";
+import React, { useContext, useState, useLayoutEffect } from "react";
 import { View, Text, Button, TextInput } from "react-native";
-import { signOut, getAuth } from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 import { ref, onValue, push, remove, update } from 'firebase/database';
 import { db, app } from './../../firebaseConnection';
 
 import styles from './styles';
+import { UserContext } from "../../contexts/AuthContext";
 
 export default function Home({ navigation }) {
+    const { signOut } = useContext(UserContext);
     const [loading, setLoading] = useState(true);
     const [tasks, setTasks] = useState([]);
     const [task, setTask] = useState({
@@ -15,12 +17,6 @@ export default function Home({ navigation }) {
         , dataFinal: Date()
     });
     const auth = getAuth(app);
-
-    async function logout() {
-        await signOut(auth);
-        setTasks([]);
-        alert('Deslgoado com sucesso!');
-    }
 
     async function createTask() {
         try {
@@ -37,25 +33,6 @@ export default function Home({ navigation }) {
         }
     }
 
-    // function updateUser(userKey) {
-    //     const userRef = ref(db, `/usuarios/${userKey}`);
-    //     update(userRef, {
-    //         nome: 'felipe 124',
-    //         // Outros campos que deseja atualizar, se houver
-    //     });
-    // }
-
-    // function clearUser(userKey) {
-    //     const userRef = ref(db, `/usuarios/${userKey}`); // Substitua 'seu_nodo' pelo caminho correto
-    //     remove(userRef)
-    //         .then(() => {
-    //             console.log(`Usuário com chave ${userKey} removido com sucesso.`);
-    //         })
-    //         .catch((error) => {
-    //             console.error(`Erro ao remover o usuário: ${error}`);
-    //         });
-    // }
-
     const fetchTasks = async () => {
         try {
             onValue(ref(db, '/tasks'), (querySnapShot) => {
@@ -69,20 +46,6 @@ export default function Home({ navigation }) {
         }
     };
 
-    // const fetchUser = async (userKey) => {
-    //     try {
-    //         onValue(ref(db, `/usuarios/${userKey}`), (querySnapShot) => {
-    //             const userData = querySnapShot.val() || {};
-    //             console.log('Dados do usuário: ', userData);
-    //             setLoading(false);
-    //         });
-
-    //     } catch (error) {
-    //         console.error("Error fetching data:", error);
-    //         setLoading(false);
-    //     }
-    // };
-
     useLayoutEffect(() => {
         fetchTasks();
     }, []);
@@ -92,7 +55,7 @@ export default function Home({ navigation }) {
             <Button
                 style={styles.button}
                 title="Sair"
-                onPress={logout}
+                onPress={signOut}
             />
             {
                 loading ? (

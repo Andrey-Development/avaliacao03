@@ -1,49 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, StyleSheet, TextInput, Button } from 'react-native';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
-import { push, ref } from 'firebase/database';
- // Import the necessary Firebase auth functions
-
-import { db, app } from './../../firebaseConnection';
+import { UserContext } from '../../contexts/AuthContext';
 
 export default function SignUp({ navigation }) {
+    const { createUser } = useContext(UserContext);
     const [user, setUser] = useState({
         nome: ''
         ,email: ''
+        ,password: ''
     });
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-
-    async function cadastrar() {
-        const auth = getAuth(app);
-        try {
-            await createUserWithEmailAndPassword(auth, user.email, password);
-            push(ref(db, '/usuarios'), user);
-            alert('Usuario criado: ' + user.nome);
-        } catch (error) {
-            if (error.code === 'auth/weak-password') {
-                alert('Sua senha deve ter pelo menos 6 caracteres');
-            } else if (error.code === 'auth/invalid-email') {
-                alert('Email inválido');
-            } else {
-                alert('Ops, algo deu errado: ' + error.message);
-            }
-        }
-
-        // setUser({
-        //     nome: ''
-        //     ,email: ''
-        // });
-        // setPassword('');
-        setConfirmPassword('');
-    }
-
-    function addNewUser() {
-        push(ref(db, '/usuarios'), {
-            nome: 'felipe',
-            idade: 33,
-        });
-    }
 
     return (
         <View style={styles.container}>
@@ -67,13 +32,15 @@ export default function SignUp({ navigation }) {
             <TextInput
                 style={styles.input}
                 underlineColorAndroid="transparent"
-                onChangeText={(texto) => setPassword(texto)}
-                value={password}
+                onChangeText={(texto) => setUser({...user, password: texto})}
+                value={user.password}
             />
 
             <Button 
                 title="Cadastrar" 
-                onPress={cadastrar} 
+                onPress={() => {
+                    createUser(user);
+                }} 
             />
 
             <Button

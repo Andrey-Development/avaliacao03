@@ -1,4 +1,4 @@
-import React, { useContext, useState, useLayoutEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { View, Text, Button, TextInput } from "react-native";
 import { getAuth } from 'firebase/auth';
 import { ref, onValue, push, remove, update } from 'firebase/database';
@@ -8,46 +8,13 @@ import styles from './styles';
 import { UserContext } from "../../contexts/AuthContext";
 
 export default function Home({ navigation }) {
-    const { signOut } = useContext(UserContext);
-    const [loading, setLoading] = useState(true);
-    const [tasks, setTasks] = useState([]);
-    const [task, setTask] = useState({
-        nome: ''
-        , finalizada: Date()
-        , dataFinal: Date()
-    });
-    const auth = getAuth(app);
+    const { loading, tasks, fetchTasks, signOut } = useContext(UserContext);
 
-    async function createTask() {
-        try {
-            await push(ref(db, '/tasks'), task);
-            alert('Tarefa cadastrada com sucesso!');
-            setTask({
-                nome: ''
-                , finalizada: Date()
-                , dataFinal: Date()
-            });
-            fetchTasks();
-        } catch (e) {
-            alert('erro: ' + e);
-        }
-    }
-
-    const fetchTasks = async () => {
-        try {
-            onValue(ref(db, '/tasks'), (querySnapShot) => {
-                const tasksData = querySnapShot.val() || {};
-                setTasks(tasksData);
-            });
-            setLoading(false);
-        } catch (error) {
-            console.error("Error fetching data:", error);
-            setLoading(false);
-        }
-    };
-
-    useLayoutEffect(() => {
+    useEffect(() => {
         fetchTasks();
+        setTimeout(() => {
+            console.log('tasks: ' + tasks);
+        }, 1500);
     }, []);
 
     return (
@@ -68,9 +35,9 @@ export default function Home({ navigation }) {
                             onPress={() => navigation.navigate('NewTask')}
                         />
                         {tasks ? (
-                            Object.keys(tasks).map((taskId) => (
-                                <View key={taskId}>
-                                    <Text>{`Nome: ${tasks[taskId].nome}`}</Text>
+                            tasks.map(([id, task]) => (
+                                <View key={id}>
+                                    <Text>{`Nome: ${task.nome}`}</Text>
                                 </View>
                             ))
                         ) : (

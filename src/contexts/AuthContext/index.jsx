@@ -1,7 +1,7 @@
 import React, { createContext, useEffect, useState } from 'react';
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { db, app } from '../../firebaseConnection';
-import { query } from 'firebase/database';
+import { equalTo, get, onValue, orderByChild, push, query, ref } from 'firebase/database';
 
 // Criação do Contexto de Usuário
 export const UserContext = createContext();
@@ -12,50 +12,18 @@ export const UserProvider = ({ children }) => {
     const usersRef = ref(db, 'usuarios/');
     const tasksRef = ref(db, 'tasks/');
     const [user, setUser] = useState(null);
-    const [tasks, setTasks] = useState(null);
+    const [userId, setUserId] = useState(null);
+    const [tasks, setTasks] = useState({});
     const [loading, setLoading] = useState(false);
     const [signed, setSigned] = useState(false);
     const [bearerToken, setBearerToken] = useState(null);
     const [task, setTask] = useState(null);
-
-    async function fetchTasks() {
-        try {
-
-            query(ref(db, ), orderByValue('dataFinal'), equalTo(), (querySnapShot) => {
-                const tasksData = querySnapShot.val() || {};
-                setTasks(tasksData);
-            }, {
-                onlyOnce: true
-            });
-            setLoading(false);
-        } catch (error) {
-            console.error("Error fetching data:", error);
-            setLoading(false);
-        }
-    }
-
-    const createTask = async () => {
-        try {
-            await push(ref(db, '/tasks'), {
-                ...task,
-                dataFinal: dataFinal,
-                usuario_uid: user.id
-            });
-
-            alert('Tarefa cadastrada com sucesso!');
-
-            setTask(null);
-        } catch (e) {
-            alert('erro: ' + e);
-        }
-    }
 
     // Funcao para verificar sessão ativa com o firebase
     const fetchSession = async () => {
         setLoading(true);
         await onAuthStateChanged(auth, (user) => {
             setUser(user);
-            console.log(user);
             if (user) setSigned(true);
         });
         setLoading(false);
@@ -64,15 +32,12 @@ export const UserProvider = ({ children }) => {
     // Função para fazer login do usuário
     const loginUser = async (userData) => {
         setLoading(true);
+
         const { email, password } = userData;
-        // await signInWithEmailAndPassword(auth, 'nandreyout@gmail.com', 'Teste123')
-        await signInWithEmailAndPassword(auth, email, password)
+        // await signInWithEmailAndPassword(auth, email, password)
+        await signInWithEmailAndPassword(auth, 'nandreyout@gmail.com', 'Teste123')
             .then((value) => {
-                alert('Bem-vindo: ' + value.user.email);
-                // setBearerToken(value.user.stsTokenManager);
-                console.log(value.user);
-                setSigned(true);
-                setUser(value.user.email);
+                setUserId(value.user.uid);
             })
             .catch((error) => {
                 if (error.code === 'auth/weak-password') {
@@ -86,6 +51,9 @@ export const UserProvider = ({ children }) => {
                 return;
             });
 
+        const response = await get(ref(db, `usuarios/${userId}`));
+        setUser(response);
+        setSigned(true);
         setLoading(false);
     };
 
@@ -106,7 +74,7 @@ export const UserProvider = ({ children }) => {
             await createUserWithEmailAndPassword(auth, email, password).then(response => {
                 const { uid } = response.user;
                 set(ref(db, 'usuarios/' + uid), user);
-                setUser({ ...user, id: uid });
+                setUserId(uid);
             });
             setSigned(true);
             alert('Usuario criado: ' + user.nome);
@@ -122,33 +90,62 @@ export const UserProvider = ({ children }) => {
     }
 
     const fetchTasks = async () => {
-        if (!user) {
-            alert("Usuário não logado")
-            return;
-        }
-        console.log('user: ' + user);
         try {
-            onValue(ref(db, 'tasks/'), (querySnapShot) => {
-                const tasksData = querySnapShot.val() || {};
-                setTasks(tasksData);
+            setLoading(true);
+            await onValue(ref(db, `tasks/`), snapshot => {
+                const dataTasks = snapshot.val() ? Object.entries(snapshot.val()) : null;
+                if (dataTasks !== null) {
+                    setTimeout(() => {
+                        const newTasks = [];
+                        dataTasks.map(([id, task]) => {
+                            if (task.usuario_id == userId) {
+                                newTasks.push({ id: id, task: task });
+                            }
+                        });
+                        setTasks(newTasks);
+                    }, 1000);
+                }
             });
             setLoading(false);
         } catch (error) {
             console.error("Error fetching data:", error);
             setLoading(false);
         }
-    };
+    }
+
+    const createTask = async (nome) => {
+        try {
+            if (!nome) return;
+            const dataCadastro = Date();
+            const dataFinal = Date();
+            await push(ref(db, '/tasks'), {
+                nome: nome,
+                dataCadastro: dataCadastro,
+                dataFinal: dataFinal,
+                usuario_id: userId
+            });
+
+            alert('Tarefa cadastrada com sucesso!');
+
+            setTask(null);
+        } catch (error) {
+            alert('erro: ' + error);
+        }
+    }
 
     useEffect(() => {
         fetchSession();
     }, []);
 
-    useEffect(() => {
-        fetchTasks();
-    }, [createTask]);
+    // useEffect(() => {
+    //     setTimeout(() => {
+    //         fetchTasks();
+    //         console.log('tasks: ' + tasks);
+    //     }, 1000);
+    // }, []);
 
     return (
-        <UserContext.Provider value={{ signed, user, loginUser, logOut, createUser, fetchTasks, }}>
+        <UserContext.Provider value={{ signed, user, loading, loginUser, logOut, createUser, fetchTasks, createTask }}>
             {children}
         </UserContext.Provider>
     );

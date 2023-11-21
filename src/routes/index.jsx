@@ -11,13 +11,6 @@ function Routes() {
     const [user, setUser] = useState(null);
     const auth = getAuth(app);
 
-    useEffect(() => {
-        const subscriber = onAuthStateChanged(auth, (user) => {
-            setUser(user);
-        });
-        if(subscriber) console.log(subscriber);
-        return subscriber;
-    }, []);
     return (
         <NavigationContainer>
             {

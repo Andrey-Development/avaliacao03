@@ -1,10 +1,12 @@
-import React, { UserContext, useState } from "react";
+import React, { useContext, useState } from "react";
 import { Button, Text, TextInput, View } from 'react-native';
 
+import { UserContext } from "../../contexts/AuthContext";
 import styles from './styles';
 
 function NewTask({ navigation }) {
-    const { createTask, task, setTask } = useContext(UserContext);
+    const { createTask } = useContext(UserContext);
+    const [nome, setNome] = useState({nome: ''});
 
     return (
         <View style={styles.container}>
@@ -12,14 +14,16 @@ function NewTask({ navigation }) {
             <TextInput
                 style={styles.input}
                 underlineColorAndroid="transparent"
-                onChangeText={(texto) => setTask({ ...task, nome: texto })}
-                value={task.nome}
+                onChangeText={(texto) => setNome(texto)}
+                value={nome}
             />
 
             <Button
                 style={styles.button}
                 title="Cadastrar"
-                onPress={createTask}
+                onPress={() => {
+                    createTask(nome);
+                }}
             />
 
             <Button

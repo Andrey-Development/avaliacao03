@@ -9,8 +9,6 @@ export const UserContext = createContext();
 // Componente Provider
 export const UserProvider = ({ children }) => {
     const auth = getAuth(app);
-    const usersRef = ref(db, 'usuarios/');
-    const tasksRef = ref(db, 'tasks/');
     const [user, setUser] = useState(null);
     const [userId, setUserId] = useState(null);
     const [tasks, setTasks] = useState({});
@@ -18,16 +16,6 @@ export const UserProvider = ({ children }) => {
     const [signed, setSigned] = useState(false);
     const [bearerToken, setBearerToken] = useState(null);
     const [task, setTask] = useState(null);
-
-    // Funcao para verificar sessão ativa com o firebase
-    const fetchSession = async () => {
-        setLoading(true);
-        await onAuthStateChanged(auth, (user) => {
-            setUser(user);
-            if (user) setSigned(true);
-        });
-        setLoading(false);
-    };
 
     // Função para fazer login do usuário
     const loginUser = async (userData) => {
@@ -59,9 +47,12 @@ export const UserProvider = ({ children }) => {
 
     // Função para fazer logout do usuário
     const logOut = async () => {
+        setLoading(true);
         await signOut(auth);
         setUser(null);
         setBearerToken(null);
+        setSigned(false);
+        setLoading(false);
     };
 
     async function createUser(data) {
@@ -99,7 +90,7 @@ export const UserProvider = ({ children }) => {
                         const newTasks = [];
                         dataTasks.map(([id, task]) => {
                             if (task.usuario_id == userId) {
-                                newTasks.push({ id: id, task: task });
+                                newTasks.push({ id: id, nome: task.nome });
                             }
                         });
                         setTasks(newTasks);
@@ -133,19 +124,19 @@ export const UserProvider = ({ children }) => {
         }
     }
 
-    useEffect(() => {
-        fetchSession();
-    }, []);
-
-    // useEffect(() => {
-    //     setTimeout(() => {
-    //         fetchTasks();
-    //         console.log('tasks: ' + tasks);
-    //     }, 1000);
-    // }, []);
-
     return (
-        <UserContext.Provider value={{ signed, user, loading, loginUser, logOut, createUser, fetchTasks, createTask }}>
+        <UserContext.Provider value={{ 
+                signed
+                ,user
+                ,loading
+                ,setLoading
+                ,loginUser
+                ,logOut
+                ,createUser
+                ,fetchTasks
+                ,createTask
+            }}
+        >
             {children}
         </UserContext.Provider>
     );

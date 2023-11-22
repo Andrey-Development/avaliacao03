@@ -12,7 +12,11 @@ function Routes() {
     const auth = getAuth(app);
 
     return (
-        <NavigationContainer>
+        <NavigationContainer
+            style={{
+                backgroundColor: '#3c3c3c',
+            }}
+        >
             {
                 signed ? <AppRoutes /> : <AuthRoutes />
             }

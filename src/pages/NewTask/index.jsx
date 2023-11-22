@@ -6,7 +6,7 @@ import styles from './styles';
 
 function NewTask({ navigation }) {
     const { createTask } = useContext(UserContext);
-    const [nome, setNome] = useState({nome: ''});
+    const [nome, setNome] = useState('');
 
     return (
         <View style={styles.container}>

@@ -6,17 +6,17 @@ export default function SignUp({ navigation }) {
     const { createUser } = useContext(UserContext);
     const [user, setUser] = useState({
         nome: ''
-        ,email: ''
-        ,password: ''
+        , email: ''
+        , password: ''
     });
 
     return (
-        <View style={styles.container}>
+        <View style={styles.container}> 
             <Text style={styles.texto}>Nome</Text>
             <TextInput
                 style={styles.input}
                 underlineColorAndroid="transparent"
-                onChangeText={(texto) => setUser({...user, nome: texto})}
+                onChangeText={(texto) => setUser({ ...user, nome: texto })}
                 value={user.nome}
             />
 
@@ -24,7 +24,7 @@ export default function SignUp({ navigation }) {
             <TextInput
                 style={styles.input}
                 underlineColorAndroid="transparent"
-                onChangeText={(texto) => setUser({...user, email: texto})}
+                onChangeText={(texto) => setUser({ ...user, email: texto })}
                 value={user.email}
             />
 
@@ -32,40 +32,53 @@ export default function SignUp({ navigation }) {
             <TextInput
                 style={styles.input}
                 underlineColorAndroid="transparent"
-                onChangeText={(texto) => setUser({...user, password: texto})}
+                onChangeText={(texto) => setUser({ ...user, password: texto })}
                 value={user.password}
             />
 
-            <Button 
-                title="Cadastrar" 
-                onPress={() => {
-                    createUser(user);
-                }} 
-            />
+            <View style={styles.divButtoms}>
+                <Button
+                    title="Cadastrar"
+                    onPress={() => {
+                        createUser(user);
+                    }}
+                />
 
-            <Button
-                title="Já possuo cadastro"
-                onPress={() => navigation.navigate('Login')}
-            />
+                <Button
+                    title="Já possuo cadastro"
+                    onPress={() => navigation.navigate('Login')}
+                />
+            </View>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
+        backgroundColor: '#3c3c3c',
         flex: 1,
-        margin: 10,
-        gap: 8,
+        padding: 10,
     },
     texto: {
-        fontSize: 20,
+        color: '#f1f1fa',
+        fontSize: 20
     },
     input: {
         marginBottom: 10,
         padding: 10,
-        borderWidth: 1,
-        borderColor: '#121212',
+        borderBottomWidth: 1,
+        borderColor: '#c6c6c6',
         height: 45,
         fontSize: 17,
+        marginBottom: 12,
+    },
+    divButtoms: {
+        marginTop: 16,
+        gap: 12,
+    },
+    button: {
+        color: '#f1f1fa',
+        backgroundColor: '#00cbcc',
+        marginBottom: 12,
     }
 });
